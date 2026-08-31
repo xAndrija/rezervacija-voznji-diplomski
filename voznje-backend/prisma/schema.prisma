@@ -1,0 +1,68 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  PUTNIK
+  VOZAC
+  ADMIN
+}
+
+enum RideStatus {
+  AKTIVNA
+  ZAVRSENA
+  OTKAZANA
+}
+
+enum ReservationStatus {
+  POTVRDJENA
+  OTKAZANA
+}
+
+model User {
+  id        Int      @id @default(autoincrement())
+  ime       String
+  prezime   String
+  email     String   @unique
+  lozinka   String
+  telefon   String?
+  uloga     Role     @default(PUTNIK)
+  createdAt DateTime @default(now())
+
+  voznjeKaoVozac Ride[]        @relation("VozacRides")
+  rezervacije    Reservation[]
+}
+
+model Ride {
+  id                 Int        @id @default(autoincrement())
+  polaznaLokacija    String
+  odredisnaLokacija  String
+  datumVremePolaska  DateTime
+  brojSlobodnihMesta Int
+  cenaPoMestu        Decimal
+  status             RideStatus @default(AKTIVNA)
+  createdAt          DateTime   @default(now())
+
+  vozacId Int
+  vozac   User @relation("VozacRides", fields: [vozacId], references: [id])
+
+  rezervacije Reservation[]
+}
+
+model Reservation {
+  id                    Int                @id @default(autoincrement())
+  brojRezervisanihMesta Int
+  datumRezervacije      DateTime           @default(now())
+  status                ReservationStatus  @default(POTVRDJENA)
+
+  voznjaId Int
+  voznja   Ride @relation(fields: [voznjaId], references: [id])
+
+  korisnikId Int
+  korisnik   User @relation(fields: [korisnikId], references: [id])
+}
