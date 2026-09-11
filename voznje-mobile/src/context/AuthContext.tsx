@@ -1,6 +1,7 @@
 import { createContext, useContext, useState, useEffect } from 'react';
 import type { ReactNode } from 'react';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { setOnUnauthorized } from '../api/client';
 
 interface Korisnik {
   id: number;
@@ -52,6 +53,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setToken(null);
     setKorisnik(null);
   };
+
+  useEffect(() => {
+    setOnUnauthorized(izlogujSe);
+  }, []);
 
   return (
     <AuthContext.Provider value={{ korisnik, token, ucitavanje, ulogujSe, izlogujSe }}>
